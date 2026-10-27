@@ -16,11 +16,7 @@ SCORE_COLUMNS = {
 
 
 def clean(raw: pd.DataFrame) -> pd.DataFrame:
-    """Оставляет семестровые формы обучения, приводит баллы к числам, помечает долги.
-
-    Возвращает строки со столбцами: student, plan, form, semester, discipline,
-    fail, noshow, retake, commission, att1, att2, att3, exam.
-    """
+    """Оставляет семестровые формы обучения, приводит баллы к числам, помечает долги."""
     df = raw[raw["ФормаОбучения"].isin(config.SEMESTER_FORMS)].copy()
     df["semester"] = df["ПериодКонтроля"].map(config.SEMESTER_NUMBER)
     df = df.dropna(subset=["semester", "ИтоговаяОтметка"])

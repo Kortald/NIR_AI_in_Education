@@ -90,7 +90,6 @@ def main():
     print("\n== Калибровка вероятностей (все пары) ==")
     print(calib.round(4).to_string(index=False))
 
-    # кривая потерь собственной логистической регрессии на всей выборке
     scaler_model = experiments.classification_models()["Логистическая регрессия (с нуля)"]
     scaler_model.fit(pairs[config.FEATURES], pairs["y"].to_numpy())
     visualisation.plot_loss(scaler_model[-1].loss_history_, out / "fig_loss.png")

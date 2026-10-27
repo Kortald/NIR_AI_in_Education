@@ -53,8 +53,8 @@ def test_calibration_summary_perfect_and_biased():
     from src.experiments import calibration_summary
     rng = np.random.default_rng(0)
     p = rng.uniform(0.02, 0.5, size=6000)
-    y = (rng.uniform(size=p.size) < p).astype(int)              # метки сгенерированы из p
+    y = (rng.uniform(size=p.size) < p).astype(int)
     good, table = calibration_summary(y, p)
     assert good["ECE"] < 0.03 and abs(good["наклон"] - 1) < 0.15 and len(table) == 10
-    bad, _ = calibration_summary(y, np.clip(p * 0.5, 0, 1))      # занижаем вероятности вдвое
+    bad, _ = calibration_summary(y, np.clip(p * 0.5, 0, 1))
     assert bad["сумма_прогнозов"] < 0.6 * bad["факт"] and bad["ECE"] > good["ECE"]
