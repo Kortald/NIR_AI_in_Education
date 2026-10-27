@@ -1,0 +1,58 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ipynb_checkpoints/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+build/
+dist/
+
+# --- Виртуальные окружения ---
+.venv/
+venv/
+env/
+
+# --- Данные ---
+# Кэш прочитанного xlsx (пересоздаётся при первом запуске, ~8 МБ)
+nir_code/data/
+# Стандарты и xlsx-приложения: большие, чужие по авторским правам, лежат у каждого локально
+Сборник файлов/
+*.xlsx
+*.xlsm
+*.xlam
+*.pkl
+
+# --- Сборка отчёта (LaTeX/Node) ---
+*.aux
+*.log
+*.toc
+*.out
+*.xdv
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+node_modules/
+
+# --- Документы (отчёты и стандарты не в git) ---
+*.pdf
+*.docx
+*.doc
+
+# --- Временные файлы Office ---
+~$*
+.~lock.*#
+
+# --- Редакторы и ОС ---
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Черновики и выгрузки (pdf, txt) ---
+*outputs*/
