@@ -1,21 +1,20 @@
-"""Модели: логистическая регрессия на градиентном спуске (с нуля) и базовые модели."""
+# Модели: логистическая регрессия на градиентном спуске (с нуля) и базовые модели.
 import numpy as np
 from sklearn.base import BaseEstimator, ClassifierMixin
 
 
 def sigmoid(z):
-    """Логистическая функция 1/(1+exp(-z)); z обрезается, чтобы exp не переполнялся."""
+    # Логистическая функция 1/(1+exp(-z)); z обрезается, чтобы exp не переполнялся.
     return 1.0 / (1.0 + np.exp(-np.clip(z, -30, 30)))
 
 
 class LogisticRegressionGD(BaseEstimator, ClassifierMixin):
-    """Логистическая регрессия, обученная полным градиентным спуском.
-
-    Минимизируется средний логарифмический лосс с L2-штрафом (без штрафа на сдвиг):
-        J(w) = -mean( s_i * [y ln p + (1-y) ln(1-p)] ) + (l2/2) * |w|^2,
-        p = sigmoid(X w + b), s_i: вес объекта.
-    Градиент: dJ/dw = X^T (s * (p - y)) / sum(s) + l2 * w.
-    """
+    # Логистическая регрессия, обученная полным градиентным спуском.
+    #
+    # Минимизируется средний логарифмический лосс с L2-штрафом (без штрафа на сдвиг):
+    #     J(w) = -mean( s_i * [y ln p + (1-y) ln(1-p)] ) + (l2/2) * |w|^2,
+    #     p = sigmoid(X w + b), s_i: вес объекта.
+    # Градиент: dJ/dw = X^T (s * (p - y)) / sum(s) + l2 * w.
 
     def __init__(self, lr=0.1, n_iter=2000, l2=1e-3, class_weight=None):
         self.lr = lr
@@ -24,7 +23,7 @@ class LogisticRegressionGD(BaseEstimator, ClassifierMixin):
         self.class_weight = class_weight
 
     def _sample_weights(self, y):
-        """Веса объектов: «balanced» уравнивает суммарный вес классов."""
+        # Веса объектов: «balanced» уравнивает суммарный вес классов.
         weights = np.ones(len(y))
         if self.class_weight == "balanced":
             for cls in (0, 1):
@@ -63,7 +62,7 @@ class LogisticRegressionGD(BaseEstimator, ClassifierMixin):
 
 
 class MajorityBaseline(BaseEstimator, ClassifierMixin):
-    """Всегда предсказывает самый частый класс обучающей выборки."""
+    # Всегда предсказывает самый частый класс обучающей выборки.
 
     def fit(self, X, y):
         y = np.asarray(y)
@@ -81,7 +80,7 @@ class MajorityBaseline(BaseEstimator, ClassifierMixin):
 
 
 class PersistenceBaseline(BaseEstimator, ClassifierMixin):
-    """Повторяет прошлый семестр: должник сейчас -> должник и в следующем."""
+    # Повторяет прошлый семестр: должник сейчас -> должник и в следующем.
 
     def fit(self, X, y):
         self.classes_ = np.array([0, 1])
@@ -96,10 +95,9 @@ class PersistenceBaseline(BaseEstimator, ClassifierMixin):
 
 
 class ConstantRateBaseline(BaseEstimator, ClassifierMixin):
-    """Каждому объекту даёт одну и ту же вероятность долга: долю должников в обучении.
-
-    Нужна для прогноза числа должников: сумма таких вероятностей = размер группы x доля.
-    """
+    # Каждому объекту даёт одну и ту же вероятность долга: долю должников в обучении.
+    #
+    # Нужна для прогноза числа должников: сумма таких вероятностей = размер группы x доля.
 
     def fit(self, X, y):
         self.rate_ = float(np.mean(y))

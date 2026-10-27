@@ -1,4 +1,4 @@
-"""Защита от утечки: один студент не может быть одновременно в обучении и в тесте."""
+# Защита от утечки: один студент не может быть одновременно в обучении и в тесте.
 import numpy as np
 import pandas as pd
 from sklearn.base import BaseEstimator, ClassifierMixin
@@ -8,10 +8,9 @@ from src.experiments import oof_probabilities, select_scenario
 
 
 class SpyModel(BaseEstimator, ClassifierMixin):
-    """Запоминает студентов обучения и проверяет, что в тесте их нет.
-
-    Номер студента подставлен в признак n_disc, чтобы модель его видела.
-    """
+    # Запоминает студентов обучения и проверяет, что в тесте их нет.
+    #
+    # Номер студента подставлен в признак n_disc, чтобы модель его видела.
 
     def fit(self, X, y):
         self.seen_ = set(X["n_disc"])

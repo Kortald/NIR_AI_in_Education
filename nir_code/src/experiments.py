@@ -1,7 +1,6 @@
-"""Эксперименты: кросс-валидация по студентам, проверка по времени, прогноз числа должников.
-
-Во всех схемах один студент целиком попадает либо в обучение, либо в тест.
-"""
+# Эксперименты: кросс-валидация по студентам, проверка по времени, прогноз числа должников.
+#
+# Во всех схемах один студент целиком попадает либо в обучение, либо в тест.
 import numpy as np
 import pandas as pd
 from sklearn.base import clone
@@ -22,12 +21,12 @@ BASELINES = ("Константа (мажоритарный класс)", "Пов
 
 
 def _prepare(model):
-    """Пропуски -> медиана обучающей части, затем стандартизация."""
+    # Пропуски -> медиана обучающей части, затем стандартизация.
     return make_pipeline(SimpleImputer(strategy="median"), StandardScaler(), model)
 
 
 def classification_models() -> dict:
-    """Модели для классификации. Дисбаланс классов компенсируется весами."""
+    # Модели для классификации. Дисбаланс классов компенсируется весами.
     seed = config.SEED
     return {
         BASELINES[0]: MajorityBaseline(),
@@ -46,7 +45,7 @@ def classification_models() -> dict:
 
 
 def count_models() -> dict:
-    """Модели для прогноза числа должников: без весов, чтобы вероятности не искажались."""
+    # Модели для прогноза числа должников: без весов, чтобы вероятности не искажались.
     seed = config.SEED
     return {
         "Константная доля": ConstantRateBaseline(),
@@ -60,7 +59,7 @@ def count_models() -> dict:
 
 
 def select_scenario(pairs: pd.DataFrame, scenario: str) -> pd.DataFrame:
-    """«all» - все пары; «new» - только студенты без долга в семестре t (новые должники)."""
+    # «all» - все пары; «new» - только студенты без долга в семестре t (новые должники).
     if scenario == "new":
         return pairs[pairs["n_fail"] == 0].reset_index(drop=True)
     return pairs.reset_index(drop=True)
@@ -68,11 +67,10 @@ def select_scenario(pairs: pd.DataFrame, scenario: str) -> pd.DataFrame:
 
 def oof_probabilities(data: pd.DataFrame, model, seed: int, n_splits: int = config.N_FOLDS,
                       tune: bool = False):
-    """Прогноз для каждой пары моделью, не видевшей этого студента (кросс-валидация по студентам).
-
-    Возвращает (вероятности долга в t+1, метки 0/1). Если tune=True, порог решения для меток
-    подбирается по Qc внутри обучающей части блока, на тест он не смотрит.
-    """
+    # Прогноз для каждой пары моделью, не видевшей этого студента (кросс-валидация по студентам).
+    #
+    # Возвращает (вероятности долга в t+1, метки 0/1). Если tune=True, порог решения для меток
+    # подбирается по Qc внутри обучающей части блока, на тест он не смотрит.
     X, y = data[config.FEATURES], data["y"].to_numpy()
     folds = StratifiedGroupKFold(n_splits=n_splits, shuffle=True, random_state=seed)
     proba, labels = np.zeros(len(data)), np.zeros(len(data), dtype=int)
@@ -86,7 +84,7 @@ def oof_probabilities(data: pd.DataFrame, model, seed: int, n_splits: int = conf
 
 
 def tune_threshold(model, train: pd.DataFrame, seed: int) -> float:
-    """Порог, при котором Qc максимален на внутренней кросс-валидации обучающей части."""
+    # Порог, при котором Qc максимален на внутренней кросс-валидации обучающей части.
     y = train["y"].to_numpy()
     if len(np.unique(y)) < 2:
         return 0.5
@@ -97,10 +95,9 @@ def tune_threshold(model, train: pd.DataFrame, seed: int) -> float:
 
 
 def cross_validate(pairs: pd.DataFrame, scenario: str):
-    """Кросс-валидация по студентам, повторённая N_REPEATS раз.
-
-    Возвращает (таблица средних метрик, словарь {модель: вероятности первого повтора}, данные).
-    """
+    # Кросс-валидация по студентам, повторённая N_REPEATS раз.
+    #
+    # Возвращает (таблица средних метрик, словарь {модель: вероятности первого повтора}, данные).
     data = select_scenario(pairs, scenario)
     y = data["y"].to_numpy()
     rows, first_repeat = [], {}
@@ -117,7 +114,7 @@ def cross_validate(pairs: pd.DataFrame, scenario: str):
 
 
 def _summarize(name: str, per_repeat: list) -> dict:
-    """Среднее и разброс метрик по повторам."""
+    # Среднее и разброс метрик по повторам.
     table = pd.DataFrame(per_repeat)
     row = {"модель": name}
     for col in ["Qc", "accuracy", "precision", "recall", "f1", "roc_auc", "pr_auc"]:
@@ -129,11 +126,10 @@ def _summarize(name: str, per_repeat: list) -> dict:
 
 
 def temporal_check(pairs: pd.DataFrame, scenario: str) -> pd.DataFrame:
-    """Обучение на парах семестров 1-2, тест на парах семестра 3 («прошлое -> будущее»).
-
-    Студенты в обеих частях могут повторяться: признаки теста берутся из семестра 3,
-    а цель из семестра 4, которых обучение не видело.
-    """
+    # Обучение на парах семестров 1-2, тест на парах семестра 3 («прошлое -> будущее»).
+    #
+    # Студенты в обеих частях могут повторяться: признаки теста берутся из семестра 3,
+    # а цель из семестра 4, которых обучение не видело.
     data = select_scenario(pairs, scenario)
     train = data[data["semester"].isin([1, 2])]
     test = data[data["semester"] == 3]
@@ -150,11 +146,10 @@ def temporal_check(pairs: pd.DataFrame, scenario: str) -> pd.DataFrame:
 
 
 def debtor_counts(pairs: pd.DataFrame):
-    """Прогноз числа должников на следующий семестр по группам (учебный план x семестр).
-
-    Прогноз группы = сумма вероятностей долга её студентов (кросс-валидация по студентам).
-    Возвращает (сводка метрик по моделям, таблица групп, итоги по семестрам).
-    """
+    # Прогноз числа должников на следующий семестр по группам (учебный план x семестр).
+    #
+    # Прогноз группы = сумма вероятностей долга её студентов (кросс-валидация по студентам).
+    # Возвращает (сводка метрик по моделям, таблица групп, итоги по семестрам).
     data = pairs.reset_index(drop=True)
     groups = {}
     for name, model in count_models().items():
@@ -187,13 +182,12 @@ CALIBRATION_MODELS = ("Логистическая регрессия (с нул�
 
 
 def calibration_summary(y, proba, n_bins: int = 10):
-    """Калибровка вероятностей: итоговые показатели и таблица по группам одинакового размера.
-
-    Показатели: Brier, Brier константной доли (для сравнения), ECE (взвешенное среднее
-    |прогноз - доля долгов| по группам), отношение суммы прогнозов к факту, наклон и сдвиг
-    калибровочной прямой (логистическая регрессия метки на logit прогноза; идеал: 1 и 0).
-    Группы строятся по квантилям прогноза, поэтому в каждой около N/n_bins пар.
-    """
+    # Калибровка вероятностей: итоговые показатели и таблица по группам одинакового размера.
+    #
+    # Показатели: Brier, Brier константной доли (для сравнения), ECE (взвешенное среднее
+    # |прогноз - доля долгов| по группам), отношение суммы прогнозов к факту, наклон и сдвиг
+    # калибровочной прямой (логистическая регрессия метки на logit прогноза; идеал: 1 и 0).
+    # Группы строятся по квантилям прогноза, поэтому в каждой около N/n_bins пар.
     y, proba = np.asarray(y, dtype=float), np.asarray(proba, dtype=float)
     clipped = np.clip(proba, 1e-6, 1 - 1e-6)
     logit = np.log(clipped / (1 - clipped)).reshape(-1, 1)
@@ -211,8 +205,8 @@ def calibration_summary(y, proba, n_bins: int = 10):
 
 
 def calibration_check(pairs: pd.DataFrame):
-    """Калибровка вероятностей моделей для прогноза числа должников (те же разбиения, что в
-    debtor_counts). Возвращает (сводка по моделям, таблицы по группам, прогнозы)."""
+    # Калибровка вероятностей моделей для прогноза числа должников (те же разбиения, что в
+    # debtor_counts). Возвращает (сводка по моделям, таблицы по группам, прогнозы).
     data = pairs.reset_index(drop=True)
     models = count_models()
     rows, tables, probas = [], {}, {}
@@ -225,11 +219,10 @@ def calibration_check(pairs: pd.DataFrame):
 
 
 def bootstrap_qc(data: pd.DataFrame, labels: dict, n_boot: int = 1000, seed: int = config.SEED):
-    """Доверительные интервалы Qc бутстрэпом по студентам (все пары одного студента вместе).
-
-    labels: {модель: метки 0/1 первого повтора кросс-валидации}.
-    Для каждой модели также считается разность Qc с «повтором прошлого семестра».
-    """
+    # Доверительные интервалы Qc бутстрэпом по студентам (все пары одного студента вместе).
+    #
+    # labels: {модель: метки 0/1 первого повтора кросс-валидации}.
+    # Для каждой модели также считается разность Qc с «повтором прошлого семестра».
     y = data["y"].to_numpy()
     students, inverse = np.unique(data["student"].to_numpy(), return_inverse=True)
     rng = np.random.default_rng(seed)

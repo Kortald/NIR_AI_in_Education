@@ -1,7 +1,6 @@
-"""Точка входа: один запуск воспроизводит все цифры, таблицы и графики отчёта.
-
-    python3 main.py          # результаты пишутся в results/
-"""
+# Точка входа: один запуск воспроизводит все цифры, таблицы и графики отчёта.
+#
+# python3 main.py          # результаты пишутся в results/
 import json
 import sys
 from pathlib import Path
@@ -20,7 +19,7 @@ SCENARIOS = {"all": "все студенты", "new": "новые должник
 
 
 def describe_data(panel, pairs, out):
-    """Таблицы описания данных для главы об экспериментах."""
+    # Таблицы описания данных для главы об экспериментах.
     by_sem = panel.groupby("semester")["debtor"].agg(студенто_семестров="size", должников="sum")
     by_sem["доля"] = by_sem["должников"] / by_sem["студенто_семестров"]
     by_sem.to_csv(out / "data_debtors_by_semester.csv", encoding="utf-8-sig")

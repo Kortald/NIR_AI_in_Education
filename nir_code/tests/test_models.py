@@ -1,4 +1,4 @@
-"""Проверка логистической регрессии с нуля: сходится и совпадает с sklearn."""
+# Проверка логистической регрессии с нуля: сходится и совпадает с sklearn.
 import numpy as np
 from sklearn.linear_model import LogisticRegression
 

@@ -1,4 +1,4 @@
-"""Графики для отчёта. Палитра Окабе-Ито, различима при дальтонизме и в ч/б печати."""
+# Графики для отчёта. Палитра Окабе-Ито, различима при дальтонизме и в ч/б печати.
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -13,7 +13,7 @@ plt.rcParams.update({"font.size": 10, "axes.spines.top": False, "axes.spines.rig
 
 
 def plot_qc(summary, title, path, k=2):
-    """Столбики Qc по моделям с границами «соответствия» из таблицы 1."""
+    # Столбики Qc по моделям с границами «соответствия» из таблицы 1.
     low, high = qc_thresholds(k)
     order = summary.sort_values("Qc")
     fig, ax = plt.subplots(figsize=(7.5, 3.6))
@@ -76,7 +76,7 @@ def plot_loss(history, path):
 
 
 def plot_counts(groups, model, path):
-    """Прогноз и факт числа должников по группам (план x семестр)."""
+    # Прогноз и факт числа должников по группам (план x семестр).
     fig, ax = plt.subplots(figsize=(4.4, 4.2))
     top = max(groups["actual"].max(), groups[model].max()) * 1.05
     ax.scatter(groups["actual"], groups[model], s=18, color=COLORS[0], alpha=0.75)
@@ -90,7 +90,7 @@ def plot_counts(groups, model, path):
 
 
 def plot_calibration(tables, path):
-    """Диаграмма надёжности: средний прогноз и фактическая доля долгов по группам прогноза."""
+    # Диаграмма надёжности: средний прогноз и фактическая доля долгов по группам прогноза.
     fig, ax = plt.subplots(figsize=(4.6, 4.2))
     top = max(max(t["прогноз"].max(), t["доля_долгов"].max()) for t in tables.values()) * 1.1
     ax.plot([0, top], [0, top], color="grey", lw=0.8, ls=":", label="идеальная калибровка")
